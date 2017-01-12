@@ -49,7 +49,7 @@ $LL3@speck_setk:
 ; Line 52
 	mov	edx, eax
 	mov	eax, ebx
-	cmp	esi, 27					; 0000001bH
+	cmp	esi, 26					; 0000001aH
 	jb	SHORT $LL3@speck_setk
 ; Line 54
 	pop	edi

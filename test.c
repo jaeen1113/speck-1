@@ -32,7 +32,7 @@ uint8_t key[]=
 
 int main (void)
 {
-  uint32_t subkeys[SPECK_RNDS*8], buf[8];
+  uint32_t subkeys[SPECK_RNDS*4], buf[8];
   int     equ;
   
   // copy plaintext to local buffer

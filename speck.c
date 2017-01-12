@@ -40,7 +40,7 @@ void speck_setkey(const void *in, void *ks)
   k3 = ((uint32_t*)in)[3];
 
   // expand 128-bit key into round keys
-  for (i=0; i<SPECK_RNDS; i++)
+  for (i=0; i<SPECK_RNDS-1; i++)
   {
     ((uint32_t*)ks)[i] = k0;
     
