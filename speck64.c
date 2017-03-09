@@ -32,7 +32,7 @@
 #ifndef SINGLE
 void speck64_setkey(
     const void *in, 
-    void *ks)
+    void *out)
 {
   uint32_t i, t, k0, k1, k2, k3;
 
@@ -45,7 +45,7 @@ void speck64_setkey(
   // expand 128-bit key into round keys
   for (i=0; i<27; i++)
   {
-    ((uint32_t*)ks)[i] = k0;
+    ((uint32_t*)out)[i] = k0;
     
     k1 = (ROTR32(k1, 8) + k0) ^ i;
     k0 = ROTL32(k0, 3) ^ k1;

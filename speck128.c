@@ -33,7 +33,7 @@
 
 void speck128_setkey(
     const void *in, 
-    void *ks)
+    void *out)
 {
   uint64_t i, t, k0, k1, k2, k3;
 
@@ -46,7 +46,7 @@ void speck128_setkey(
   // expand 128-bit key into round keys
   for (i=0; i<34; i++)
   {
-    ((uint64_t*)ks)[i] = k0;
+    ((uint64_t*)out)[i] = k0;
     
     k1 = (ROTR64(k1, 8) + k0) ^ i;
     k0 = ROTL64(k0,  3) ^ k1;

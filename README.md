@@ -6,7 +6,7 @@
 
 64-bit block size, 128-bit keys
 
-	void speck64_setkey(const void *in, void *ks);
+	void speck64_setkey(const void *in, void *out);
 	void speck64_encrypt(int enc, void *in, const void *keys);
 	void speck64_encryptx(void *in, const void *keys);
 
@@ -14,7 +14,7 @@
 
 128-bit block size, 256-bit keys
 
-	void speck128_setkey(const void *in, void *ks);
+	void speck128_setkey(const void *in, void *out);
 	void speck128_encrypt(int enc, void *in, const void *keys);
 	void speck128_encryptx(void *in, const void *keys);
 
