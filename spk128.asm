@@ -152,13 +152,13 @@ speck128_encryptx:
     push   rdi
     push   rsi   
 
-    mov    k0, [rcx]         ; k0 = key[0]
-    mov    k1, [rcx+8]       ; k1 = key[1]
+    mov    k0, [rcx   ]      ; k0 = key[0]
+    mov    k1, [rcx+ 8]      ; k1 = key[1]
     mov    k2, [rcx+16]      ; k2 = key[2]
     mov    k3, [rcx+24]      ; k3 = key[3]
     
     push   rdx
-    mov    x0, [rdx]         ; x0 = in[0]
+    mov    x0, [rdx  ]       ; x0 = in[0]
     mov    x1, [rdx+8]       ; x1 = in[1] 
     
     xor    eax, eax          ; i = 0
@@ -186,7 +186,7 @@ spk_el:
     jnz    spk_el
     
     pop    rax
-    mov    [rax], x0
+    mov    [rax  ], x0
     mov    [rax+8], x1
     
     pop    rsi
