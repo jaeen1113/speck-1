@@ -159,6 +159,7 @@ _speck64_encryptx:
     pushad    
     mov    esi, [esp+32+8]   ; esi = in
     push   esi               ; save
+    
     lodsd
     xchg   eax, x0           ; x0 = in[0]
     lodsd
@@ -172,8 +173,7 @@ _speck64_encryptx:
     lodsd
     xchg   eax, k2           ; k2 = key[2]
     lodsd 
-    xchg   eax, k3           ; k3 = key[3]
-    
+    xchg   eax, k3           ; k3 = key[3]    
     xor    eax, eax          ; i = 0
 spk_el:
     ; x0 = (ROTR32(x0, 8) + x1) ^ k0;
@@ -189,8 +189,7 @@ spk_el:
     xor    k1, eax
     ; k0 = ROTL32(k0, 3) ^ k1;
     rol    k0, 3
-    xor    k0, k1
-    
+    xor    k0, k1    
     xchg   k3, k2
     xchg   k3, k1
     ; i++

@@ -1,5 +1,5 @@
 ;
-;  Copyright © 2017 Odzhan, Peter Ferrie. All Rights Reserved.
+;  Copyright © 2017 Odzhan. All Rights Reserved.
 ;
 ;  Redistribution and use in source and binary forms, with or without
 ;  modification, are permitted provided that the following conditions are
@@ -30,7 +30,7 @@
 ; -----------------------------------------------
 ; Speck128/256 block cipher in x86-64 assembly
 ;
-; size: 128 bytes (88 for just encryption) 
+; size: 132 bytes (88 for just encryption) 
 ;
 ; global calls use microsoft fastcall convention
 ;
@@ -57,8 +57,8 @@ speck128_setkey:
     push   rdi
     push   rsi   
 
-    mov    k0, [rcx]         ; k0 = key[0]
-    mov    k1, [rcx+8]       ; k1 = key[1]
+    mov    k0, [rcx   ]      ; k0 = key[0]
+    mov    k1, [rcx+ 8]      ; k1 = key[1]
     mov    k2, [rcx+16]      ; k2 = key[2]
     mov    k3, [rcx+24]      ; k3 = key[3]
 
@@ -72,8 +72,7 @@ spk_sk:
     xor    k1, rax
     ; k0 = ROTL32(k0, 3) ^ k1;
     rol    k0, 3
-    xor    k0, k1
-    ; rotate left 32-bits
+    xor    k0, k1    
     xchg   k3, k2
     xchg   k3, k1
     ; i++
@@ -89,41 +88,43 @@ spk_sk:
 %define x0 rax    
 %define x1 rbx
     
-speck64_encrypt:
+speck128_encrypt:
     push   rbx
     push   rdi
     push   rsi
     
-    push   rdx
-    mov    x0, [rdx]         ; x0 = in[0]
+    push   rdx               ; save in
+    mov    x0, [rdx  ]       ; x0 = in[0]
     mov    x1, [rdx+8]       ; x1 = in[1] 
 
-    test   ecx, ecx
+    test   ecx, ecx          ; enc == SPECK_ENCRYPT
     mov    cl, SPECK_RNDS
     jz     spk_e0
 spk_d0:
-    ; x1 = ROTR32(x1 ^ x0, 3);
-    xor    x1, x0
-    ror    x1, 3
-    ; x0 = ROTL32((x0 ^ ks[SPECK_RNDS-1-i]) - x1, 8);
-    xor    x0, [r8+8*rcx-8]
-    sub    x0, x1
-    rol    x0, 8
+    ; x0 = ROTR32(x0 ^ x1, 3);
+    xor    x0, x1
+    ror    x0, 3
+    ; x1 = ROTL32((x1 ^ ks[SPECK_RNDS-1-i]) - x0, 8);
+    xor    x1, [r8+8*rcx-8]
+    sub    x1, x0
+    rol    x1, 8
     loop   spk_d0
     jmp    spk_end    
 spk_e0:
-    ; x0 = (ROTR32(x0, 8) + x1) ^ ks[i];
-    ror    x0, 8
-    add    x0, x1
-    xor    x0, [r8]
-    ; x1 = ROTL32(x1, 3) ^ x0;
-    rol    x1, 3
-    xor    x1, x0
+    ; x1 = (ROTR32(x1, 8) + x0) ^ ks[i];
+    ror    x1, 8
+    add    x1, x0
+    xor    x1, [r8]
+    add    r8, 8
+    ; x0 = ROTL32(x0, 3) ^ x1;
+    rol    x0, 3
+    xor    x0, x1
     loop   spk_e0
 spk_end:
-    pop    rdi
-    mov    [rdi], x0
+    pop    rdi             ; restore in
+    mov    [rdi  ], x0
     mov    [rdi+8], x1  
+    
     pop    rsi
     pop    rdi
     pop    rbx

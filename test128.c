@@ -94,9 +94,9 @@ int main (void)
       //speck64_encrypt (subkeys, SPECK_ENCRYPT, buf);
       speck64_encryptx (tv[i].key, buf);
     } else {
-      //speck128_setkey (tv[i].key, subkeys);
-      //speck128_encrypt (subkeys, SPECK_ENCRYPT, buf);
-      speck128_encryptx(tv[i].key, buf);
+      speck128_setkey (tv[i].key, subkeys);
+      speck128_encrypt (SPECK_ENCRYPT, buf, subkeys);
+      //speck128_encryptx(tv[i].key, buf);
     }
     
     equ = memcmp(tv[i].cipher, buf, tv[i].blocklen)==0;
@@ -110,7 +110,7 @@ int main (void)
       //speck64_encrypt (subkeys, SPECK_DECRYPT, buf);
     } else {
       speck128_setkey (tv[i].key, subkeys);
-      speck128_encrypt (subkeys, SPECK_DECRYPT, buf);
+      speck128_encrypt (SPECK_DECRYPT, buf, subkeys);
     }    
     
     equ = memcmp(tv[i].plain, buf, tv[i].blocklen)==0;

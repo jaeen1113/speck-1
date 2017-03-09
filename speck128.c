@@ -58,9 +58,9 @@ void speck128_setkey(
 }
 
 void speck128_encrypt(
-    const void *keys, 
     int enc, 
-    void *in)
+    void *in,
+    const void *keys)
 {
   uint64_t i;
   uint64_t *ks=(uint64_t*)keys;

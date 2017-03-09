@@ -71,7 +71,7 @@ void speck64_encrypt(const void*, int, void*);
 void speck64_encryptx(const void*, void*);
 
 void speck128_setkey(const void*, void*);
-void speck128_encrypt(const void*, int, void*);
+void speck128_encrypt(int, void*, const void*);
 void speck128_encryptx(const void*, void*);
     
 #ifdef __cplusplus
