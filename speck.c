@@ -1,80 +1,172 @@
-/**
-  Copyright © 2017 Odzhan. All Rights Reserved.
+/*
+Copyright (c) 2016, Moritz Bitsch
 
-  Redistribution and use in source and binary forms, with or without
-  modification, are permitted provided that the following conditions are
-  met:
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
 
-  1. Redistributions of source code must retain the above copyright
-  notice, this list of conditions and the following disclaimer.
-
-  2. Redistributions in binary form must reproduce the above copyright
-  notice, this list of conditions and the following disclaimer in the
-  documentation and/or other materials provided with the distribution.
-
-  3. The name of the author may not be used to endorse or promote products
-  derived from this software without specific prior written permission.
-
-  THIS SOFTWARE IS PROVIDED BY AUTHORS "AS IS" AND ANY EXPRESS OR
-  IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-  DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT,
-  INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-  SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
-  HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
-  STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-  POSSIBILITY OF SUCH DAMAGE. */
-
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+*/
 #include "speck.h"
 
-void speck_setkey(const void *in, void *ks)
+#define ROR(x, r) ((x >> r) | (x << ((sizeof(SPECK_TYPE) * 8) - r)))
+#define ROL(x, r) ((x << r) | (x >> ((sizeof(SPECK_TYPE) * 8) - r)))
+
+#ifdef SPECK_32_64
+#define R(x, y, k) (x = ROR(x, 7), x += y, x ^= k, y = ROL(y, 2), y ^= x)
+#define RR(x, y, k) (y ^= x, y = ROR(y, 2), x ^= k, x -= y, x = ROL(x, 7))
+#else
+#define R(x, y, k) ( \
+  x = ROR(x, 8), \
+  x += y, \
+  x ^= k, \
+  y = ROL(y, 3), \
+  y ^= x)
+  
+#define RR(x, y, k) ( \
+  y ^= x, \
+  y = ROR(y, 3), \
+  x ^= k, \
+  x -= y, \
+  x = ROL(x, 8))
+#endif
+
+void speck_expand(
+   SPECK_TYPE const K[SPECK_KEY_LEN], 
+   SPECK_TYPE S[SPECK_ROUNDS])
 {
-  uint32_t i, t, k0, k1, k2, k3;
+  SPECK_TYPE i, b = K[0];
+  SPECK_TYPE a[SPECK_KEY_LEN - 1];
 
-  // copy 128-bit key to local space
-  k0 = ((uint32_t*)in)[0];
-  k1 = ((uint32_t*)in)[1];
-  k2 = ((uint32_t*)in)[2];
-  k3 = ((uint32_t*)in)[3];
-
-  // expand 128-bit key into round keys
-  for (i=0; i<SPECK_RNDS-1; i++)
-  {
-    ((uint32_t*)ks)[i] = k0;
-    
-    k1 = (ROTR32(k1, 8) + k0) ^ i;
-    k0 = ROTL32(k0, 3) ^ k1;
-    
-    // rotate left 32-bits
-    XCHG(k3, k2, t);
-    XCHG(k3, k1, t);
+  for (i = 0; i < (SPECK_KEY_LEN - 1); i++) {
+    a[i] = K[i + 1];
+  }
+  
+  S[0] = b;  
+  
+  for (i = 0; i < SPECK_ROUNDS - 1; i++) {
+    R(a[i % (SPECK_KEY_LEN - 1)], b, i);
+    S[i + 1] = b;
   }
 }
 
-void speck_encrypt(const void *keys, int enc, void *in)
+void speck_encrypt(SPECK_TYPE const pt[ 2], SPECK_TYPE ct[ 2], SPECK_TYPE const K[ SPECK_ROUNDS])
 {
-  uint8_t i;
-  uint32_t *ks=(uint32_t*)keys;
-  
-  // copy input to local space
-  uint32_t x0=((uint32_t*)in)[0];
-  uint32_t x1=((uint32_t*)in)[1];
-  
-  for (i=0; i<SPECK_RNDS; i++)
-  {
-    if (enc==SPECK_DECRYPT)
-    {
-      x1 = ROTR32(x1 ^ x0, 3);
-      x0 = ROTL32((x0 ^ ks[SPECK_RNDS-1-i]) - x1, 8);        
-    } else {
-      x0 = (ROTR32(x0, 8) + x1) ^ ks[i];
-      x1 = ROTL32(x1, 3) ^ x0;
-    }
+  SPECK_TYPE i;
+  ct[0]=pt[0]; ct[1]=pt[1];
+
+  for(i = 0; i < SPECK_ROUNDS; i++){
+    R(ct[1], ct[0], K[i]);
   }
-  // save result
-  ((uint32_t*)in)[0] = x0;
-  ((uint32_t*)in)[1] = x1;
 }
 
+void speck_decrypt(SPECK_TYPE const ct[ 2], SPECK_TYPE pt[ 2], SPECK_TYPE const K[ SPECK_ROUNDS])
+{
+  SPECK_TYPE i;
+  pt[0]=ct[0]; pt[1]=ct[1];
+
+  for(i = 0; i < SPECK_ROUNDS; i++){
+    RR(pt[1], pt[0], K[(SPECK_ROUNDS - 1) - i]);
+  }
+}
+
+void speck_encrypt_combined(SPECK_TYPE const pt[ 2], SPECK_TYPE ct[ 2], SPECK_TYPE const K[ SPECK_KEY_LEN])
+{
+  SPECK_TYPE i, b = K[0];
+  SPECK_TYPE a[SPECK_KEY_LEN - 1];
+  ct[0]=pt[0]; ct[1]=pt[1];
+
+  for (i = 0; i < (SPECK_KEY_LEN - 1); i++)
+  {
+    a[i] = K[i + 1];
+  }
+
+  R(ct[1], ct[0], b);
+  for(i = 0; i < SPECK_ROUNDS - 1; i++){
+    R(a[i % (SPECK_KEY_LEN - 1)], b, i);
+    R(ct[1], ct[0], b);
+  }
+}
+
+void speck_decrypt_combined(SPECK_TYPE const ct[ 2], SPECK_TYPE pt[ 2], SPECK_TYPE const K[ SPECK_KEY_LEN])
+{
+  int i;
+  SPECK_TYPE b = K[0];
+  SPECK_TYPE a[SPECK_KEY_LEN - 1];
+  pt[0]=ct[0]; pt[1]=ct[1];
+
+  for (i = 0; i < (SPECK_KEY_LEN - 1); i++)
+  {
+    a[i] = K[i + 1];
+  }
+
+  for (i = 0; i < SPECK_ROUNDS - 1; i++)
+  {
+    R(a[i % (SPECK_KEY_LEN - 1)], b, i);
+  }
+
+  for(i = 0; i < SPECK_ROUNDS; i++){
+    RR(pt[1], pt[0], b);
+    RR(a[((SPECK_ROUNDS - 2) - i) % (SPECK_KEY_LEN - 1)], b, ((SPECK_ROUNDS - 2) - i));
+  }
+}
+
+#ifdef TEST
+
+#include <string.h>
+#include <stdio.h>
+
+int main(int argc, char** argv)
+{
+#ifdef SPECK_32_64
+  uint16_t key[4] = {0x0100, 0x0908, 0x1110, 0x1918};
+  uint16_t plain[2] = {0x694c, 0x6574};
+  uint16_t enc[2] = {0x42f2, 0xa868};
+#endif
+
+#ifdef SPECK_64_128
+  uint32_t key[4] = {0x03020100, 0x0b0a0908, 0x13121110, 0x1b1a1918};
+  uint32_t plain[2] = {0x7475432d, 0x3b726574};
+  uint32_t enc[2] = {0x454e028b, 0x8c6fa548};
+#endif
+
+#ifdef SPECK_128_256
+  uint64_t key[4] = {0x0706050403020100, 0x0f0e0d0c0b0a0908, 0x1716151413121110, 0x1f1e1d1c1b1a1918};
+  uint64_t plain[2] = {0x202e72656e6f6f70, 0x65736f6874206e49};
+  uint64_t enc[2] = {0x4eeeb48d9c188f43, 0x4109010405c0f53e};
+#endif
+
+  SPECK_TYPE buffer[2] = {0};
+  SPECK_TYPE exp[SPECK_ROUNDS];
+
+  speck_expand(key, exp);
+
+#ifdef TEST_COMBINED
+  speck_encrypt_combined(plain, buffer, key);
+#else
+  speck_encrypt(plain, buffer, exp);
+#endif
+  if (memcmp(buffer, enc, sizeof(enc))) {
+    printf("encryption failed\n");
+    return 1;
+  }
+#ifdef TEST_COMBINED
+  speck_decrypt_combined(enc, buffer, key);
+#else
+  speck_decrypt(enc, buffer, exp);
+#endif
+  if (memcmp(buffer, plain, sizeof(enc))) {
+    printf("decryption failed\n");
+    return 1;
+  }
+  printf("OK\n");
+  return 0;
+}
+
+#endif

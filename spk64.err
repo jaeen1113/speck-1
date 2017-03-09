@@ -1,0 +1,52 @@
+spk64.asm(39) : Error A2209: Syntax error: bits
+spk64.asm(41) : Error A2209: Syntax error: define
+spk64.asm(46) : Error A2209: Syntax error: global
+spk64.asm(47) : Error A2209: Syntax error: global
+spk64.asm(50) : Error A2209: Syntax error: define
+spk64.asm(51) : Error A2209: Syntax error: define
+spk64.asm(52) : Error A2209: Syntax error: define
+spk64.asm(53) : Error A2209: Syntax error: define
+spk64.asm(55) : Error A2082: Must be in segment block
+spk64.asm(56) : Error A2082: Must be in segment block
+spk64.asm(57) : Error A2082: Must be in segment block
+spk64.asm(58) : Error A2082: Must be in segment block
+spk64.asm(59) : Error A2082: Must be in segment block
+spk64.asm(60) : Error A2082: Must be in segment block
+spk64.asm(61) : Error A2082: Must be in segment block
+spk64.asm(62) : Error A2082: Must be in segment block
+spk64.asm(63) : Error A2082: Must be in segment block
+spk64.asm(64) : Error A2082: Must be in segment block
+spk64.asm(65) : Error A2082: Must be in segment block
+spk64.asm(66) : Error A2082: Must be in segment block
+spk64.asm(67) : Error A2082: Must be in segment block
+spk64.asm(68) : Error A2082: Must be in segment block
+spk64.asm(69) : Error A2082: Must be in segment block
+spk64.asm(71) : Error A2082: Must be in segment block
+spk64.asm(73) : Error A2082: Must be in segment block
+spk64.asm(74) : Error A2082: Must be in segment block
+spk64.asm(75) : Error A2082: Must be in segment block
+spk64.asm(77) : Error A2082: Must be in segment block
+spk64.asm(78) : Error A2082: Must be in segment block
+spk64.asm(80) : Error A2082: Must be in segment block
+spk64.asm(81) : Error A2082: Must be in segment block
+spk64.asm(83) : Error A2082: Must be in segment block
+spk64.asm(84) : Error A2082: Must be in segment block
+spk64.asm(85) : Error A2082: Must be in segment block
+spk64.asm(86) : Error A2082: Must be in segment block
+spk64.asm(87) : Error A2082: Must be in segment block
+spk64.asm(89) : Error A2209: Syntax error: define
+spk64.asm(90) : Error A2209: Syntax error: define
+spk64.asm(92) : Error A2082: Must be in segment block
+spk64.asm(93) : Error A2082: Must be in segment block
+spk64.asm(94) : Error A2082: Must be in segment block
+spk64.asm(95) : Error A2082: Must be in segment block
+spk64.asm(96) : Error A2082: Must be in segment block
+spk64.asm(97) : Error A2082: Must be in segment block
+spk64.asm(98) : Error A2082: Must be in segment block
+spk64.asm(99) : Error A2082: Must be in segment block
+spk64.asm(100) : Error A2082: Must be in segment block
+spk64.asm(101) : Error A2082: Must be in segment block
+spk64.asm(102) : Error A2082: Must be in segment block
+spk64.asm(103) : Error A2082: Must be in segment block
+spk64.asm(104) : Error A2082: Must be in segment block
+spk64.asm(104) : Fatal error A1113: Too many errors

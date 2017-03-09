@@ -28,49 +28,48 @@
 ;  POSSIBILITY OF SUCH DAMAGE.
 
 ; -----------------------------------------------
-; Speck64/128 block cipher in x86 assembly
+; Speck128/256 block cipher in x86-64 assembly
 ;
-; size: 105 bytes
+; size: 105 bytes (88 for just encryption) 
 ;
-; global calls use cdecl convention
+; global calls use microsoft fastcall convention
 ;
 ; -----------------------------------------------
 
-    bits 32
+    bits 64
 
+%define SPECK_RNDS 34
+    
+%ifndef SINGLE
+    
 %ifndef BIN
-    global _speck_setkeyx
-    global _speck_encryptx
+    global speck128_setkey
+    global speck128_encrypt
 %endif
     
-%define SPECK_RNDS 27
+%define k0 rdi    
+%define k1 rbx    
+%define k2 rsi    
+%define k3 rcx
     
-%define k0 eax    
-%define k1 ebx    
-%define k2 ebp    
-%define k3 edx
-    
-speck_setkeyx:
-_speck_setkeyx:
-    pushad
-    mov    esi, [esp+32+4]   ; esi = in
-    mov    edi, [esp+32+8]   ; edi = ks
-    lodsd
-    xchg   eax, k3
-    lodsd
-    xchg   eax, k1
-    lodsd
-    xchg   eax, k2
-    lodsd
-    xchg   eax, k3
-    xor    ecx, ecx
+speck128_setkey:
+    push   rbx
+    push   rdi
+    push   rsi   
+
+    mov    k0, [rcx]         ; k0 = key[0]
+    mov    k1, [rcx+8]       ; k1 = key[1]
+    mov    k2, [rcx+16]      ; k2 = key[2]
+    mov    k3, [rcx+24]      ; k3 = key[3]
+
+    xor    eax, eax
 spk_sk:
     ; ((uint32_t*)ks)[i] = k0;
-    stosd
+    mov    [rdx+rax*8], k0
     ; k1 = (ROTR32(k1, 8) + k0) ^ i;
     ror    k1, 8
     add    k1, k0
-    xor    k1, ecx
+    xor    k1, rax
     ; k0 = ROTL32(k0, 3) ^ k1;
     rol    k0, 3
     xor    k0, k1
@@ -78,29 +77,27 @@ spk_sk:
     xchg   k3, k2
     xchg   k3, k1
     ; i++
-    inc    ecx
-    cmp    cl, SPECK_RNDS    
+    add    al, 1
+    cmp    al, SPECK_RNDS    
     jnz    spk_sk   
-    popad
+    
+    pop    rsi
+    pop    rdi
+    pop    rbx
     ret
 
-%define x0 eax    
-%define x1 ebx
+%define x0 rax    
+%define x1 rbx
     
-speck_encryptx:
-_speck_encryptx:
-    pushad
-    lea    esi, [esp+32+4]
-    lodsd
-    xchg   edi, eax          ; edi = ks
-    lodsd
-    xchg   eax, ecx          ; ecx = enc
-    lodsd
-    xchg   eax, esi          ; esi = in
-    push   esi
-    lodsd    
-    xchg   eax, x1
-    lodsd
+speck64_encrypt:
+    push   rbx
+    push   rdi
+    push   rsi
+    
+    push   rdx
+    mov    x0, [rdx]         ; x0 = in[0]
+    mov    x1, [rdx+8]       ; x1 = in[1] 
+    
     xchg   eax, x1
     test   ecx, ecx
     mov    cl, SPECK_RNDS
@@ -132,9 +129,75 @@ spk_end:
     xchg   eax, x1
     ; ((uint32_t*)in)[1] = x1;
     stosd    
-    popad
-    ret    
+    pop    rsi
+    pop    rdi
+    pop    rbx
+    ret   
     
+%else
+
+;
+; speck128/256 encryption in 88 bytes
+;
+%ifndef BIN
+    global speck128_encryptx
+%endif
+
+%define k0 rdi    
+%define k1 rbp    
+%define k2 rsi    
+%define k3 rcx
+
+%define x0 rbx    
+%define x1 rdx
+
+speck128_encryptx:   
+    push   rbp
+    push   rbx
+    push   rdi
+    push   rsi   
+
+    mov    k0, [rcx]         ; k0 = key[0]
+    mov    k1, [rcx+8]       ; k1 = key[1]
+    mov    k2, [rcx+16]      ; k2 = key[2]
+    mov    k3, [rcx+24]      ; k3 = key[3]
     
+    push   rdx
+    mov    x0, [rdx]         ; x0 = in[0]
+    mov    x1, [rdx+8]       ; x1 = in[1] 
     
+    xor    eax, eax          ; i = 0
+spk_el:
+    ; x1 = (ROTR64(x1, 8) + x0) ^ k0;
+    ror    x1, 8
+    add    x1, x0
+    xor    x1, k0
+    ; x0 =  ROTL64(x0, 3) ^ x1;
+    rol    x0, 3
+    xor    x0, x1
+    ; k1 = (ROTR64(k1, 8) + k0) ^ i;
+    ror    k1, 8
+    add    k1, k0
+    xor    k1, rax
+    ; k0 = ROTL64(k0, 3) ^ k1;
+    rol    k0, 3
+    xor    k0, k1
     
+    xchg   k3, k2
+    xchg   k3, k1
+    ; i++
+    add    al, 1
+    cmp    al, SPECK_RNDS    
+    jnz    spk_el
+    
+    pop    rax
+    mov    [rax], x0
+    mov    [rax+8], x1
+    
+    pop    rsi
+    pop    rdi
+    pop    rbx
+    pop    rbp
+    ret
+
+%endif    

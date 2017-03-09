@@ -31,6 +31,7 @@
 #define SPECK_H
 
 #include <stdint.h>
+#include <string.h>
 
 #define SPECK_RNDS 27
 
@@ -59,16 +60,19 @@
 #define ROTR32(v, n) ROTL32(v, 32 - (n))
 #define ROTR64(v, n) ROTL64(v, 64 - (n))
 
-#define SWAP32(v) _byteswap_ulong(v)
-
 #define XCHG(x, y, t) (t) = (x); (x) = (y); (y) = (t);
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void speck_setkey(const void*, void*);
-void speck_encrypt(const void*, int, void*);
+void speck64_setkey(const void*, void*);
+void speck64_encrypt(const void*, int, void*);
+void speck64_encryptx(const void*, void*);
+
+void speck128_setkey(const void*, void*);
+void speck128_encrypt(const void*, int, void*);
+void speck128_encryptx(const void*, void*);
     
 #ifdef __cplusplus
 }
