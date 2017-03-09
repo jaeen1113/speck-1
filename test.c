@@ -84,8 +84,8 @@ int main (void)
     printf ("\nSPECK%i/%i\n", 
         tv[i].blocklen*8, tv[i].keylen*8);
     
-    print_bytes("K ", tv[i].key, tv[i].keylen);
-    print_bytes("PT", tv[i].plain, tv[i].blocklen);
+    print_bytes("K ", tv[i].key,    tv[i].keylen);
+    print_bytes("PT", tv[i].plain,  tv[i].blocklen);
     print_bytes("CT", tv[i].cipher, tv[i].blocklen);
 
     if (tv[i].blocklen == 8)
