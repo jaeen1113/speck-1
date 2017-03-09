@@ -30,7 +30,7 @@
 ; -----------------------------------------------
 ; Speck128/256 block cipher in x86-64 assembly
 ;
-; size: 105 bytes (88 for just encryption) 
+; size: 128 bytes (88 for just encryption) 
 ;
 ; global calls use microsoft fastcall convention
 ;
@@ -97,8 +97,7 @@ speck64_encrypt:
     push   rdx
     mov    x0, [rdx]         ; x0 = in[0]
     mov    x1, [rdx+8]       ; x1 = in[1] 
-    
-    xchg   eax, x1
+
     test   ecx, ecx
     mov    cl, SPECK_RNDS
     jz     spk_e0
@@ -107,7 +106,7 @@ spk_d0:
     xor    x1, x0
     ror    x1, 3
     ; x0 = ROTL32((x0 ^ ks[SPECK_RNDS-1-i]) - x1, 8);
-    xor    x0, [edi+4*ecx-4]
+    xor    x0, [r8+8*rcx-8]
     sub    x0, x1
     rol    x0, 8
     loop   spk_d0
@@ -116,19 +115,15 @@ spk_e0:
     ; x0 = (ROTR32(x0, 8) + x1) ^ ks[i];
     ror    x0, 8
     add    x0, x1
-    xor    x0, [edi]
-    scasd
+    xor    x0, [r8]
     ; x1 = ROTL32(x1, 3) ^ x0;
     rol    x1, 3
     xor    x1, x0
     loop   spk_e0
 spk_end:
-    pop    edi
-    ; ((uint32_t*)in)[0] = x0;
-    stosd
-    xchg   eax, x1
-    ; ((uint32_t*)in)[1] = x1;
-    stosd    
+    pop    rdi
+    mov    [rdi], x0
+    mov    [rdi+8], x1  
     pop    rsi
     pop    rdi
     pop    rbx
