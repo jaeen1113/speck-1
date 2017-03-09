@@ -1,9 +1,9 @@
-all: speck-test
+all: test
 
-speck-test: speck.c speck.h
-	$(CC) -O2 -DTEST -o $@ speck.c
+test: speck64.c speck128.c speck.h
+	$(CC) -O2 -Os -o $@ test.c
 
 clean:
-	rm -f speck-test
+	rm -f test
 
 .PHONY: all clean

@@ -29,7 +29,7 @@
 
 #include "speck.h"
 
-#ifndef COMPACT
+#ifndef SINGLE
 void speck64_setkey(
     const void *in, 
     void *ks)
