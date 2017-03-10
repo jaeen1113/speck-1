@@ -30,7 +30,7 @@
 ; -----------------------------------------------
 ; Speck128/256 block cipher in x86-64 assembly
 ;
-; size: 132 bytes (88 for just encryption) 
+; size: 132 bytes (86 for just encryption) 
 ;
 ; global calls use microsoft fastcall convention
 ;
@@ -50,7 +50,7 @@
 %define k0 rdi    
 %define k1 rbx    
 %define k2 rsi    
-%define k3 rcx
+%define k3 rax
     
 speck128_setkey:
     push   rbx
@@ -62,22 +62,22 @@ speck128_setkey:
     mov    k2, [rcx+16]      ; k2 = key[2]
     mov    k3, [rcx+24]      ; k3 = key[3]
 
-    xor    eax, eax
+    xor    ecx, ecx
 spk_sk:
     ; ((uint32_t*)ks)[i] = k0;
     mov    [rdx+rax*8], k0
     ; k1 = (ROTR32(k1, 8) + k0) ^ i;
     ror    k1, 8
     add    k1, k0
-    xor    k1, rax
+    xor    k1, rcx
     ; k0 = ROTL32(k0, 3) ^ k1;
     rol    k0, 3
     xor    k0, k1    
     xchg   k3, k2
     xchg   k3, k1
     ; i++
-    add    al, 1
-    cmp    al, SPECK_RNDS    
+    inc    cl
+    cmp    cl, SPECK_RNDS    
     jnz    spk_sk   
     
     pop    rsi
@@ -133,18 +133,18 @@ spk_end:
 %else
 
 ;
-; speck128/256 encryption in 88 bytes
+; speck128/256 encryption in 86 bytes
 ;
 %ifndef BIN
     global speck128_encryptx
 %endif
 
 %define k0 rdi    
-%define k1 rbp    
+%define k1 rbx    
 %define k2 rsi    
-%define k3 rcx
+%define k3 rax
 
-%define x0 rbx    
+%define x0 rbp    
 %define x1 rdx
 
 speck128_encryptx:   
@@ -162,7 +162,7 @@ speck128_encryptx:
     mov    x0, [rdx  ]       ; x0 = in[0]
     mov    x1, [rdx+8]       ; x1 = in[1] 
     
-    xor    eax, eax          ; i = 0
+    xor    ecx, ecx          ; i = 0
 spk_el:
     ; x1 = (ROTR64(x1, 8) + x0) ^ k0;
     ror    x1, 8
@@ -174,7 +174,8 @@ spk_el:
     ; k1 = (ROTR64(k1, 8) + k0) ^ i;
     ror    k1, 8
     add    k1, k0
-    xor    k1, rax
+    xor    bl, cl
+    ;xor    k1, rcx
     ; k0 = ROTL64(k0, 3) ^ k1;
     rol    k0, 3
     xor    k0, k1
@@ -182,8 +183,8 @@ spk_el:
     xchg   k3, k2
     xchg   k3, k1
     ; i++
-    add    al, 1
-    cmp    al, SPECK_RNDS    
+    inc    cl
+    cmp    cl, SPECK_RNDS    
     jnz    spk_el
     
     pop    rax
