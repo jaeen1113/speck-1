@@ -30,7 +30,7 @@ x86-64 assembly based on **speck128.c** using Microsoft fastcall convention.
 
 <table>
   <tr>
-    <th>platform</th>
+    <th>cpu</th>
     <th>setkey + encrypt + decrypt<br></th>
     <th>setkey + encrypt</th>
   </tr>
@@ -42,7 +42,7 @@ x86-64 assembly based on **speck128.c** using Microsoft fastcall convention.
   <tr>
     <td>x86-64</td>
     <td>132</td>
-    <td>88</td>
+    <td>86</td>
   </tr>
 </table> 
 
