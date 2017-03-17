@@ -37,13 +37,13 @@ void speck128_setkey(
 {
   uint64_t i, t, k0, k1, k2, k3;
 
-  // copy 128-bit key to local space
+  // copy 256-bit key to local space
   k0 = ((uint64_t*)in)[0];
   k1 = ((uint64_t*)in)[1];
   k2 = ((uint64_t*)in)[2];
   k3 = ((uint64_t*)in)[3];
 
-  // expand 128-bit key into round keys
+  // expand 256-bit key into round keys
   for (i=0; i<34; i++)
   {
     ((uint64_t*)out)[i] = k0;
