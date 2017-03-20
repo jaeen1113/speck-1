@@ -18,6 +18,23 @@ void print_bytes(char *s, void *p, int len) {
 }
 
 // p = 0x3b7265747475432d 
+uint8_t plain32[]=
+{ 0x74, 0x65, 
+  0x4c, 0x69 };
+
+// c = 0x8c6fa548454e028b  
+uint8_t cipher32[]=
+{ 0x68, 0xa8, 
+  0xf2, 0x42 };
+
+// key = 0x03020100, 0x0b0a0908, 0x13121110, 0x1b1a1918   
+uint8_t key32[]=
+{ 0x00, 0x01, 
+  0x08, 0x09,
+  0x10, 0x11, 
+  0x18, 0x19 };
+  
+// p = 0x3b7265747475432d 
 uint8_t plain64[]=
 { 0x74, 0x65, 0x72, 0x3b,
   0x2d, 0x43, 0x75, 0x74 };
@@ -67,8 +84,9 @@ typedef struct _test_t {
 } test_t;
 
 // test vectors
-test_t tv[2]=
-{{16, key64,   8, plain64,  cipher64},
+test_t tv[3]=
+{{8,  key32,   4, plain32,  cipher32},
+ {16, key64,   8, plain64,  cipher64},
  {32, key128, 16, plain128, cipher128}};
   
 int main (void)
@@ -88,7 +106,12 @@ int main (void)
     print_bytes("PT", tv[i].plain,  tv[i].blocklen);
     print_bytes("CT", tv[i].cipher, tv[i].blocklen);
 
-    if (tv[i].blocklen == 8)
+    if (tv[i].blocklen == 4)
+    {      
+      speck32_setkey (tv[i].key, subkeys);
+      speck32_encrypt (subkeys, SPECK_ENCRYPT, buf);
+      //speck32_encryptx (tv[i].key, buf);    
+    } else if (tv[i].blocklen == 8)
     {      
       speck64_setkey (tv[i].key, subkeys);
       speck64_encrypt (subkeys, SPECK_ENCRYPT, buf);
@@ -104,7 +127,11 @@ int main (void)
     printf ("\nEncryption %s\n", equ ? "OK" : "FAILED");
     print_bytes("CT", buf, tv[i].blocklen);
     
-    if (tv[i].blocklen == 8)
+    if (tv[i].blocklen == 4)
+    {      
+      speck32_setkey (tv[i].key, subkeys);
+      speck32_encrypt (subkeys, SPECK_DECRYPT, buf);
+    } else if (tv[i].blocklen == 8)
     {      
       speck64_setkey (tv[i].key, subkeys);
       speck64_encrypt (subkeys, SPECK_DECRYPT, buf);
