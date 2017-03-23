@@ -66,6 +66,10 @@
 extern "C" {
 #endif
 
+void speck32_setkey(const void*, void*);
+void speck32_encrypt(const void*, int, void*);
+void speck32_encryptx(const void*, void*);
+
 void speck64_setkey(const void*, void*);
 void speck64_encrypt(const void*, int, void*);
 void speck64_encryptx(const void*, void*);

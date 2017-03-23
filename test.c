@@ -91,11 +91,12 @@ test_t tv[3]=
   
 int main (void)
 {
-  uint64_t subkeys[34], buf[2], out[2];
+  uint64_t subkeys[34], buf[2];
   int      equ, i;
   
   for (i=0; i<sizeof(tv)/sizeof(test_t); i++)
   {
+    printf ("******************************");
     // copy plaintext to local buffer
     memcpy (buf, tv[i].plain, tv[i].blocklen);
   

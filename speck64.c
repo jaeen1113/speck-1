@@ -72,11 +72,11 @@ void speck64_encrypt(
   {
     if (enc == SPECK_DECRYPT)
     {
-      x1 = ROTR32(x1 ^ x0, 3);
+      x1 = ROTR32(x1  ^ x0, 3);
       x0 = ROTL32((x0 ^ ks[27-1-i]) - x1, 8);        
     } else {
       x0 = (ROTR32(x0, 8) + x1) ^ ks[i];
-      x1 = ROTL32(x1, 3) ^ x0;
+      x1 =  ROTL32(x1, 3) ^ x0;
     }
   }
   // save result

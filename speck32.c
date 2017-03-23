@@ -69,15 +69,17 @@ void speck32_encrypt(
   uint16_t x1 = ((uint16_t*)in)[1];
   
   for (i=0; i<22; i++)
-  {
+  {   
     if (enc == SPECK_DECRYPT)
     {
-      x1 = ROTR16(x1  ^ x0, 2);
-      x0 = ROTL16((x0 ^ ks[22-1-i]) - x1, 7);        
-    } else {
-      x0 = (ROTR16(x0, 7) + x1) ^ ks[i];
-      x1 = ROTL16(x1, 2)  ^ x0;
-    }
+      x1  = ROTR16(x1  ^ x0, 2); 
+      x0 ^= ks[22-1-i];
+      x0 -= x1;
+      x0  = ROTL16(x0, 7);        
+    } else {     
+      x0  = (ROTR16(x0, 7) + x1) ^ ks[i];
+      x1  =  ROTL16(x1, 2) ^ x0;
+    }  
   }
   // save result
   ((uint16_t*)in)[0] = x0;
