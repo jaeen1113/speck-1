@@ -52,8 +52,8 @@ void speck128_setkey(
     k0 = ROTL64(k0,  3) ^ k1;
     
     // rotate left 64-bits
-    XCHG(k3, k2, t);
-    XCHG(k3, k1, t);
+    XCHG(k3, k2);
+    XCHG(k3, k1);
   }
 }
 
@@ -113,8 +113,8 @@ void speck128_encryptx(
     k1 = (ROTR64(k1, 8) + k0) ^ i;
     k0 =  ROTL64(k0, 3) ^ k1;
 
-    XCHG(k3, k2, t);
-    XCHG(k3, k1, t);    
+    XCHG(k3, k2);
+    XCHG(k3, k1);    
   }
   // save result
   ((uint64_t*)in)[0] = x0;

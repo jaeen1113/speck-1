@@ -51,8 +51,8 @@ void speck32_setkey(
     k0 = ROTL16(k0, 2) ^ k1;
     
     // rotate left 32-bits
-    XCHG(k3, k2, t);
-    XCHG(k3, k1, t);
+    XCHG(k3, k2);
+    XCHG(k3, k1);
   }
 }
 
@@ -114,8 +114,8 @@ void speck32_encryptx(
     k1 = (ROTR16(k1, 7) + k0) ^ i;
     k0 =  ROTL16(k0, 2) ^ k1;
     
-    XCHG(k3, k2, t);
-    XCHG(k3, k1, t);    
+    XCHG(k3, k2);
+    XCHG(k3, k1);    
   }
   // save result
   ((uint16_t*)in)[0] = x0;
